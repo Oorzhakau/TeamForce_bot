@@ -2,6 +2,7 @@
 данных Postgres через Django ORM.
 """
 
+from genericpath import exists
 import os
 import sys
 from pathlib import Path
@@ -37,8 +38,8 @@ def add_subscriber(
 @sync_to_async
 def get_all_subscribers() -> List[Subscriber]:
     """Получить всех подписчиков."""
-    users = Subscriber.objects.all()
-    return users
+    subs = Subscriber.objects.all()
+    return subs
 
 
 @sync_to_async
@@ -86,13 +87,6 @@ def get_message_by_text(text: str) -> Optional[Message]:
 
 
 @sync_to_async
-def get_message_by_text(text: str) -> Optional[Message]:
-    """Получить сообщение с указанным текстом."""
-    message = Message.objects.get(text=text)
-    return message
-
-
-@sync_to_async
 def delete_message_by_text(text: str) -> None:
     """Удалить сообщение с указанным текстом."""
     message = Message.objects.get(text=text)
@@ -103,6 +97,13 @@ def delete_message_by_text(text: str) -> None:
 def get_messages_with_tag(tag: str) -> Optional[List[Optional[Message]]]:
     """Получить все сообщения с указанной темой."""
     messages = Message.objects.filter(tag__tag=tag)
+    return messages
+
+
+@sync_to_async
+def get_messages_from_sub(username: str) -> Optional[List[Optional[Message]]]:
+    """Получить все сообщения от username."""
+    messages = Message.objects.filter(author__username=username)
     return messages
 
 
@@ -121,21 +122,49 @@ def get_count_messages() -> int:
 
 @sync_to_async
 def create_tag(string: str) -> Tag:
-    '''сохранение темы в базе'''
+    """Создать тему в базе"""
     tag = Tag(tag=string).save()
     return tag
 
 
 @sync_to_async
+def get_or_create_tag(string: str) -> Optional[Tag]:
+    """Cохранение темы в базе"""
+    tag = Tag.objects.filter(tag=string)
+    if not tag.exists():
+        Tag(tag=string).save()
+        return None
+    return tag
+
+
+@sync_to_async
 def get_all_tags() -> List[Tag]:
-    """Получить все товары."""
+    """Получить все темы."""
     tags = Tag.objects.all()
     return tags
 
 
 @sync_to_async
+def get_tag(string: str) -> Tag:
+    """Получить тему."""
+    return Tag.objects.get(tag=string)
+
+
+@sync_to_async
+def check_exist_tag(tag: str) -> bool:
+    """Проверить наличие темы."""
+    return Tag.objects.filter(tag=tag).exists()
+
+
+@sync_to_async
+def check_exist_username(string: str) -> bool:
+    """Проверить наличие темы."""
+    return Subscriber.objects.filter(username=string).exists()
+
+
+@sync_to_async
 def delete_tags(tag: str) -> None:
-    """Получить товары title."""
+    """Удалить тему."""
     tag = Message.objects.get(tag=tag)
     tag.delete()
 

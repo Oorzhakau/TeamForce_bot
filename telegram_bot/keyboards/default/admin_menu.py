@@ -1,16 +1,17 @@
-"""Главное меню бота."""
+"""Меню администратора бота."""
 
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 
-main_menu = ReplyKeyboardMarkup(
+admin_menu = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Список тем 📁"),
+            KeyboardButton(text="Список корреспондентов 📁"),
             KeyboardButton(text="Добавить тему 📁"),
         ],
         [
-            KeyboardButton(text="Список сообщений на конкретную тему 💬"),
+            KeyboardButton(text="Список cообщений на конкретную тему 💬"),
             KeyboardButton(text="Список сообщений от корреспондента 👨‍⚕️"),
         ],
         [

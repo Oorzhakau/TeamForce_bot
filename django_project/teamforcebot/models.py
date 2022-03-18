@@ -120,7 +120,12 @@ class Message(TimedBaseModel):
     )
     text = models.TextField(verbose_name='Сообщение', )
     text_lemmas = models.TextField(verbose_name='Сообщение после лемматизации и нормализации', )
-    tag = models.ManyToManyField(Tag)
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='message',
+    )
     status = models.BooleanField(
         verbose_name='Статус обработки сообщения',
         default=False,

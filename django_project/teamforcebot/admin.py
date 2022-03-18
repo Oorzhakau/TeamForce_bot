@@ -25,7 +25,8 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ("pk",
                     "author",
                     "text",
-                    "status"
+                    "tag",
+                    "status",
                     )
     list_filter = ("tag", "status", )
     search_fields = ("tag",

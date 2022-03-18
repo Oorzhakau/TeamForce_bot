@@ -1,10 +1,8 @@
 from aiogram import Dispatcher
 
-from loader import dp
-
-# from .is_admin import AdminFilter
+from .filters_admin import NotAdmin, IsAdmin
 
 
-if __name__ == "filters":
-    # dp.filters_factory.bind(AdminFilter)
-    pass
+def setup(dp: Dispatcher):
+    dp.filters_factory.bind(NotAdmin)
+    dp.filters_factory.bind(IsAdmin)

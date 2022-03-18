@@ -7,7 +7,7 @@ from loader import dp
 
 
 @dp.message_handler(Command("about"))
-@dp.message_handler(Text(equals="О нас 🧙 и проекте"))
+@dp.message_handler(text="О нас 🧙 и проекте")
 async def about_us(message: Message):
     """Реализация ответа на сообщение 'О нас'."""
     text = "\n".join(
@@ -22,4 +22,4 @@ async def about_us(message: Message):
         ]
     )
     await message.answer(text=text)
-    logging.info(text)
+    logging.info("Отправка сообщения о нас.")
