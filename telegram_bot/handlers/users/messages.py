@@ -10,7 +10,6 @@ from filters.filters_admin import NotAdmin
 from loader import dp
 from utils.db_api import db_commands as commands
 from data.config import ADMIN
-from aiogram.dispatcher.filters import Command, Text
 from states.state_message import MessageState
 
 
@@ -41,7 +40,7 @@ async def bot_message(message: types.Message, state: FSMContext):
     await state.update_data(
         {"tag": tag}
     )
-    await message.answer(f"<b>Тема:{tag}<b><br>Введите сообщение:")
+    await message.answer(f"<b>Тема:</b>{tag}\nВведите сообщение:")
     await MessageState.next()
 
 
@@ -57,9 +56,9 @@ async def bot_message(message: types.Message, state: FSMContext):
         "\n".join(
             [
                 f"Сообщение добавлено в базу.",
-                f"<i>От кого</i>: {message.from_user.full_name}",
-                f"<i>Кому</i>: {User.first_name} {User.last_name}",
-                f"<i>Тема:</i>: {tag}",
+                f"<b>От кого</b>: {message.from_user.full_name}",
+                f"<b>Кому</b>: {User.first_name} {User.last_name}",
+                f"<b>Тема:</b>: {tag}",
                 f"<pre>{message.text}</pre>",
             ]
         ),
@@ -69,8 +68,8 @@ async def bot_message(message: types.Message, state: FSMContext):
         chat_id=ADMIN,
         text='\n'.join(
             [
-                f"<i>От кого</i>: {message.from_user.username}",
-                f"<i>Тема</i>: {tag}",
+                f"<b>От кого</b>: {message.from_user.username}",
+                f"<b>Тема</b>: {tag}",
                 f"<pre>{text}</pre>"
             ]
         )

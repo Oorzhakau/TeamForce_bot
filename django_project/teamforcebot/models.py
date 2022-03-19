@@ -11,20 +11,19 @@ class TimedBaseModel(models.Model):
         abstract = True
 
 
-class Position(models.Model):
-    position = models.CharField(
+class Group(models.Model):
+    name = models.CharField(
         max_length=25,
-        verbose_name='Должность',
+        verbose_name='Название',
         blank=True,
     )
     
     class Meta:
-        ordering = ['position']
-        verbose_name = 'Должность'
-        verbose_name_plural = 'Должность'
+        verbose_name = 'Группа'
+        verbose_name_plural = 'Группы'
 
     def __str__(self):
-        return self.position
+        return self.name
 
 
 class Tag(models.Model):
@@ -90,6 +89,12 @@ class Subscriber(TimedBaseModel):
         verbose_name='Телефон',
         blank=True,
         null=True,
+    )
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     company = models.CharField(
         max_length=100,

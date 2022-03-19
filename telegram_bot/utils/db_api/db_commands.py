@@ -14,7 +14,7 @@ ROOT_DIR = Path(__file__).parents[3]
 MODEL_PATH = os.path.join(ROOT_DIR, "django_project")
 sys.path.append(MODEL_PATH)
 
-from teamforcebot.models import User, Subscriber, Tag, Message
+from teamforcebot.models import User, Subscriber, Tag, Message, Group
 
 
 @sync_to_async
@@ -43,10 +43,23 @@ def get_all_subscribers() -> List[Subscriber]:
 
 
 @sync_to_async
+def get_subs_in_group(group: str) -> Optional[List[Optional[Subscriber]]]:
+    subs = Subscriber.objects.filter(group__name=group)
+    return subs
+
+
+@sync_to_async
 def get_subscriber(user_id: int) -> Optional[Subscriber]:
     """Получить подписчика по user_id."""
     if Subscriber.objects.filter(user_id=user_id).exists():
         subscriber = Subscriber.objects.get(user_id=user_id)
+        return subscriber
+
+@sync_to_async
+def get_subscriber_by_username(username: int) -> Optional[Subscriber]:
+    """Получить подписчика по user_id."""
+    if Subscriber.objects.filter(username=username).exists():
+        subscriber = Subscriber.objects.get(username=username)
         return subscriber
 
 
@@ -179,3 +192,9 @@ def get_user() -> User:
         user.user_id = user_id
         user.save()
     return user
+
+
+@sync_to_async
+def check_exist_group(string: str) -> bool:
+    """Проверить наличие темы."""
+    return Group.objects.filter(name=string).exists()

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Subscriber, Tag, User, Message
+from .models import Subscriber, Tag, User, Message, Group
 
 
 class SubscriberAdmin(admin.ModelAdmin):
@@ -47,3 +47,4 @@ admin.site.register(Subscriber, SubscriberAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(User)
+admin.site.register(Group)
