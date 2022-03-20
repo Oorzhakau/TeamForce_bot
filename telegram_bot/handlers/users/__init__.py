@@ -7,6 +7,6 @@ from . import (about_us,
                tags,
                distribution,
                messages,
-               inline_reactions,
+               link,
                info,
                )

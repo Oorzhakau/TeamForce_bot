@@ -1,6 +1,9 @@
+import os
+from pyexpat import model
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.forms import model_to_dict
 
 
 class TimedBaseModel(models.Model):
@@ -19,32 +22,18 @@ class Group(models.Model):
     )
     
     class Meta:
-        verbose_name = 'Группа'
-        verbose_name_plural = 'Группы'
+        verbose_name = 'Кластер'
+        verbose_name_plural = 'Кластеры'
 
     def __str__(self):
         return self.name
 
 
-class Tag(models.Model):
-    tag = models.CharField(
-        max_length=100,
-        verbose_name='Тема сообщения',
-        blank=True,
-    )
-
-    class Meta:
-        ordering = ['tag']
-        verbose_name = 'Тема'
-        verbose_name_plural = 'Темы'
-
-    def __str__(self):
-        return self.tag
-
-
 class User(AbstractUser):
     user_id = models.BigIntegerField(
-        verbose_name='ID Пользователя Телеграм', unique=True, default=1
+        verbose_name='ID Пользователя Телеграм',
+        unique=True,
+        default=int(os.environ.get("ADMIN")),
     )
     
     class Meta:
@@ -55,7 +44,7 @@ class User(AbstractUser):
         return f'{self.id} {self.username}'
 
 
-class Subscriber(TimedBaseModel):
+class Subscriber(models.Model):
     user_id = models.BigIntegerField(
         verbose_name='ID Пользователя Телеграм',
         unique=True,
@@ -111,28 +100,48 @@ class Subscriber(TimedBaseModel):
     class Meta:
         verbose_name = 'Подписчик'
         verbose_name_plural = 'Подписчики'
+        default_related_name = 'subscribers'
     
     def __str__(self):
         return f'(tel id {self.user_id}) {self.username}'
 
 
+class Tag(models.Model):
+    tag = models.CharField(
+        max_length=100,
+        verbose_name='Тема сообщения',
+    )
+    subscribers = models.ManyToManyField(
+        Subscriber
+    )
+
+    class Meta:
+        ordering = ['tag']
+        verbose_name = 'Тема'
+        verbose_name_plural = 'Темы'
+        default_related_name = 'tags'
+
+    def __str__(self):
+        return self.tag
+
+
 class Message(TimedBaseModel):
     author = models.ForeignKey(
         Subscriber,
-        on_delete=models.SET_NULL,
         null=True,
+        on_delete=models.SET_NULL,
         related_name='message',
     )
     text = models.TextField(verbose_name='Сообщение', )
-    text_lemmas = models.TextField(verbose_name='Сообщение после лемматизации и нормализации', )
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
-        null=True,
         related_name='message',
+        blank=True,
+        null=True,
     )
     status = models.BooleanField(
-        verbose_name='Статус обработки сообщения',
+        verbose_name='Статус',
         default=False,
     )
 

@@ -42,6 +42,7 @@ async def bot_message(message: types.Message, state: FSMContext):
     )
     await message.answer(f"<b>Тема:</b>{tag}\nВведите сообщение:")
     await MessageState.next()
+    logging.info("Переход машины состояния в запись тема сообщения.")
 
 
 @dp.message_handler(NotAdmin(), state=MessageState.message)
@@ -75,3 +76,4 @@ async def bot_message(message: types.Message, state: FSMContext):
         )
     )
     await state.finish()
+    logging.info("Отправка сообщения и запись его в базу.")

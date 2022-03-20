@@ -2,6 +2,7 @@
 данных Postgres через Django ORM.
 """
 
+from ast import Sub
 from genericpath import exists
 import os
 import sys
@@ -43,8 +44,16 @@ def get_all_subscribers() -> List[Subscriber]:
 
 
 @sync_to_async
-def get_subs_in_group(group: str) -> Optional[List[Optional[Subscriber]]]:
-    subs = Subscriber.objects.filter(group__name=group)
+def get_subs_in_group(group: List[str]) -> Optional[List[Optional[Subscriber]]]:
+    subs = []
+    for sub in group:
+        subs.append(Subscriber.objects.get(username=sub))
+    return subs
+
+
+@sync_to_async
+def get_subs_in_group_name(group_name: str) -> Optional[List[Optional[Subscriber]]]:
+    subs = Subscriber.objects.filter(group__name=group_name)
     return subs
 
 
@@ -54,6 +63,7 @@ def get_subscriber(user_id: int) -> Optional[Subscriber]:
     if Subscriber.objects.filter(user_id=user_id).exists():
         subscriber = Subscriber.objects.get(user_id=user_id)
         return subscriber
+
 
 @sync_to_async
 def get_subscriber_by_username(username: int) -> Optional[Subscriber]:
@@ -136,7 +146,13 @@ def get_count_messages() -> int:
 @sync_to_async
 def create_tag(string: str) -> Tag:
     """Создать тему в базе"""
-    tag = Tag(tag=string).save()
+    tag = Tag(tag=string)
+    tag.save() 
+    tag.add(
+        Subscriber.objects.get(
+            user_id=int(os.environ.get("ADMIN"))
+        )
+    )
     return tag
 
 
@@ -145,15 +161,21 @@ def get_or_create_tag(string: str) -> Optional[Tag]:
     """Cохранение темы в базе"""
     tag = Tag.objects.filter(tag=string)
     if not tag.exists():
-        Tag(tag=string).save()
+        tag = Tag(tag=string)
+        tag.save()
+        tag.subscribers.add(
+            Subscriber.objects.get(
+                user_id=int(os.environ.get("ADMIN"))
+            )
+        )
         return None
     return tag
 
 
 @sync_to_async
-def get_all_tags() -> List[Tag]:
+def get_all_tags(user_id: int) -> List[Tag]:
     """Получить все темы."""
-    tags = Tag.objects.all()
+    tags = Tag.objects.filter(subscribers__user_id=user_id).all()
     return tags
 
 
@@ -178,7 +200,7 @@ def check_exist_username(string: str) -> bool:
 @sync_to_async
 def delete_tags(tag: str) -> None:
     """Удалить тему."""
-    tag = Message.objects.get(tag=tag)
+    tag = Tag.objects.get(tag=tag)
     tag.delete()
 
 
@@ -188,7 +210,9 @@ def get_user() -> User:
     try:
         user = User.objects.get(user_id=user_id)
     except:
-        user = User.objects.get(username="admin")
+        user = User.objects.get(
+            username=os.environ.get("DJANGO_SU_ADMIN")
+        )
         user.user_id = user_id
         user.save()
     return user

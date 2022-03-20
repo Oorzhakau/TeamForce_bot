@@ -5,20 +5,21 @@ from .models import Subscriber, Tag, User, Message, Group
 
 class SubscriberAdmin(admin.ModelAdmin):
     list_display = ("pk",
-                    "user_id",
                     "username",
+                    "first_name",
+                    "last_name",
                     "phone",
                     "company",
-                    )
-    list_filter = ("username",
-                   "updated_date",
-                   "company",
-                   )
-    search_fields = ("user_id",
-                     "created_date",
-                     "updated_date",
-                    )
+                    "tags",)
+    list_filter = ("username", "company",)
+    search_fields = ("user_id", "username")
     empty_value_display = "-пусто-"
+
+
+class TagAdmin(admin.ModelAdmin):
+    list_display = ("pk", "tag", )
+    list_filter = ("tag", )
+    search_fields = ("tag", )
 
 
 class MessageAdmin(admin.ModelAdmin):
@@ -26,22 +27,11 @@ class MessageAdmin(admin.ModelAdmin):
                     "author",
                     "text",
                     "tag",
-                    "status",
-                    )
+                    "status",)
     list_filter = ("tag", "status", )
-    search_fields = ("tag",
-                     "created_date",
-                     "updated_date",
-                    )
-    empty_value_display = "-пусто-"
+    search_fields = ("text", "created_date", )
+    list_editable = ("status", )
 
-
-class TagAdmin(admin.ModelAdmin):
-    list_display = ("pk", "tag", )
-    list_filter = ("tag", )
-    search_fields = ("tag", "created_date", "updated_date", )
-    empty_value_display = "-пусто-"
-    
 
 admin.site.register(Subscriber, SubscriberAdmin)
 admin.site.register(Tag, TagAdmin)

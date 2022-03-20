@@ -6,6 +6,7 @@ class DistGroupState(StatesGroup):
     group = State()
     message = State()
 
+
 class DistSubState(StatesGroup):
     """Класс машины состояния отправки сообщения корреспонденту."""
     sub = State()

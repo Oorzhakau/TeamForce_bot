@@ -3,7 +3,7 @@ import re
 import os
 
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from keyboards.default.cancel_menu import cancel_menu
 from keyboards.default.admin_menu import admin_menu
@@ -13,6 +13,8 @@ from utils.db_api import db_commands as commands
 from states.state_tag import SelectMessageByTagState
 from states.state_sub import SelectMessageBySubState
 from data.config import ADMIN
+from keyboards.inline.callback_datas import message_callback
+from keyboards.inline.react_buttons import message_choices
 
 
 @dp.message_handler(IsAdmin(),
@@ -39,8 +41,8 @@ async def return_messages_with_tag(message: Message, state: FSMContext):
     if messages:
         for msg in messages:
             await message.answer(
-                text=msg.text,
-                reply_markup=admin_menu,
+                text=f"{msg.text}",
+                reply_markup=message_choices,
             )
         await state.finish()
         return
@@ -73,9 +75,18 @@ async def return_messages_by_sub(message: Message, state: FSMContext):
         for msg in messages:
             await message.answer(
                 text=msg.text,
-                reply_markup=admin_menu,
+                reply_markup=message_choices,
             )
         await state.finish()
         return
     await message.answer(f"Сообщений от <b>{sub}</b> нет!")
     await state.finish()
+
+
+@dp.callback_query_handler(message_callback.filter(operation="delete"))
+async def buying_apples(call: CallbackQuery, callback_data: dict):
+    await call.answer(cache_time=60)
+    logging.info(f"{callback_data=}")
+    text = call.message.text
+    await commands.delete_message_by_text(text)
+    await call.message.delete()
