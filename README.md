@@ -38,18 +38,18 @@ Help по токенам
 docker-compose up --build
 ```
 - По адресу localhost:8003/admin/ переходим в панель и входим под ранее созданным superuser-ом;
-<img src="media/django_admin.jpg" alt="django-admin" border="1">
+<img src="media/Django_admin.JPG" alt="django-admin" border="1">
 
 - Проект запущен и готов к работе.
 
 ## Логика работы в telegram боте
 * У пользователя-инициатора бота после команды /menu отображается административная панель, представленная ниже:
 
-<img src="media/admin_menu.jpg" style="width:30%" alt="admin menu" border="1">
+<img src="media/Admin_menu.JPG" style="width:30%" alt="admin menu" border="1">
 
 * У пользователя-подписчика на бота после команды /menu отображается меню ниже:
 
-<img src="media/sub_menu.jpg" style="width:30%" alt="sub menu">
+<img src="media/Sub_menu.JPG" style="width:30%" alt="sub menu">
 
 * Пользователь-инициатор создает темы, через команду "Добавить тему", далее добавляет в данную тему подписчиков (уже подписавшихся на бота) через команду "Добавить корреспондента(-ов) в тему". При этом подписчикам приходит уведомление, что они добавлены в в тему, которая отображается у них в "списке тем".
   
