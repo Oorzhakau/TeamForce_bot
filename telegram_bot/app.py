@@ -31,12 +31,13 @@ async def on_startup(dispatcher):
 if __name__ == "__main__":
     setup_django()
 
+    import asyncio
+    from aiogram import executor
+
     import middlewares
     import filters
     import handlers
-    import asyncio
 
-    from aiogram import executor
     from loader import dp
 
     from utils.db_api import db_commands as commands
@@ -44,5 +45,5 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     coroutine = commands.get_user()
     loop.run_until_complete(coroutine)
-    
+
     executor.start_polling(dp, on_startup=on_startup)

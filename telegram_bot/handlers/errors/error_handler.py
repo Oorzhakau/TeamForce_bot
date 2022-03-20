@@ -1,14 +1,17 @@
 import logging
 
-from aiogram.utils.exceptions import (CantParseEntities, MessageNotModified,
-                                      TelegramAPIError)
+from aiogram.utils.exceptions import (
+    CantParseEntities,
+    MessageNotModified,
+    TelegramAPIError,
+)
 
 from loader import dp
 
 
 @dp.errors_handler()
 async def errors_handler(update, exception):
-    """Error handler перехватывающий все исключения."""
+    """Error handler, перехватывающий все исключения."""
 
     if isinstance(exception, MessageNotModified):
         logging.exception("Message is not modified")

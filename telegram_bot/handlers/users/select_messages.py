@@ -1,24 +1,19 @@
 import logging
-import re
-import os
 
 from aiogram.dispatcher import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
-from keyboards.default.cancel_menu import cancel_menu
-from keyboards.default.admin_menu import admin_menu
 from filters.filters_admin import IsAdmin
-from loader import dp
-from utils.db_api import db_commands as commands
-from states.state_tag import SelectMessageByTagState
-from states.state_sub import SelectMessageBySubState
-from data.config import ADMIN
+from keyboards.default.cancel_menu import cancel_menu
 from keyboards.inline.callback_datas import message_callback
 from keyboards.inline.react_buttons import message_choices
+from loader import dp
+from states.state_sub import SelectMessageBySubState
+from states.state_tag import SelectMessageByTagState
+from utils.db_api import db_commands as commands
 
 
-@dp.message_handler(IsAdmin(),
-                    text="Список cообщений на конкретную тему 💬")
+@dp.message_handler(IsAdmin(), text="Список cообщений на конкретную тему 💬")
 async def select_tags(message: Message):
     """Handler запроса темы."""
     await message.answer(text="Введите тему")
@@ -40,8 +35,23 @@ async def return_messages_with_tag(message: Message, state: FSMContext):
     messages = await commands.get_messages_with_tag(tag)
     if messages:
         for msg in messages:
+            from_user = [
+                str(msg.author.user_id),
+                msg.author.username,
+                msg.author.first_name,
+                msg.author.last_name,
+            ]
+            from_user = " ".join(
+                list(filter(lambda item: not (item is None), from_user))
+            )
             await message.answer(
-                text=f"{msg.text}",
+                text="\n".join(
+                    [
+                        f"<b>От кого</b>: {from_user}",
+                        f"<b>Тема</b>: {msg.tag}",
+                        f"{msg.text}",
+                    ]
+                ),
                 reply_markup=message_choices,
             )
         await state.finish()
@@ -50,19 +60,18 @@ async def return_messages_with_tag(message: Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(IsAdmin(),
-                    text="Список сообщений от корреспондента 👨‍⚕️")
+@dp.message_handler(IsAdmin(), text="Список сообщений от корреспондента 👨‍⚕️")
 async def select_sub(message: Message):
     """Handler запроса username."""
-    await message.answer(text="Введите username:")
+    await message.answer(text="Введите user_id:")
     await SelectMessageBySubState.sub.set()
 
 
 @dp.message_handler(IsAdmin(), state=SelectMessageBySubState.sub)
 async def return_messages_by_sub(message: Message, state: FSMContext):
     """Handler возврата сообщений от корреспондента."""
-    sub = message.text
-    if not await commands.check_exist_username(sub):
+    user_id = int(message.text)
+    if not await commands.check_exist_user_id(user_id):
         await message.answer(
             "Введено некорректный username. "
             + "Повторите попытку "
@@ -70,16 +79,31 @@ async def return_messages_by_sub(message: Message, state: FSMContext):
             reply_markup=cancel_menu,
         )
         return
-    messages = await commands.get_messages_from_sub(sub)
+    messages = await commands.get_messages_from_sub_by_user_id(user_id)
     if messages:
+        from_user = [
+            str(messages[0].author.user_id),
+            messages[0].author.username,
+            messages[0].author.first_name,
+            messages[0].author.last_name,
+        ]
+        from_user = " ".join(
+            list(filter(lambda item: not (item is None), from_user))
+        )
         for msg in messages:
             await message.answer(
-                text=msg.text,
+                text="\n".join(
+                    [
+                        f"<b>От кого</b>: {from_user}",
+                        f"<b>Тема</b>: {msg.tag}",
+                        f"{msg.text}",
+                    ]
+                ),
                 reply_markup=message_choices,
             )
         await state.finish()
         return
-    await message.answer(f"Сообщений от <b>{sub}</b> нет!")
+    await message.answer("Сообщений нет!")
     await state.finish()
 
 
@@ -88,5 +112,6 @@ async def buying_apples(call: CallbackQuery, callback_data: dict):
     await call.answer(cache_time=60)
     logging.info(f"{callback_data=}")
     text = call.message.text
+    text = text.split("\n")[-1]
     await commands.delete_message_by_text(text)
     await call.message.delete()

@@ -52,6 +52,14 @@ def get_subs_in_group(group: List[str]) -> Optional[List[Optional[Subscriber]]]:
 
 
 @sync_to_async
+def get_subs_in_group_by_user_id(group: List[int]) -> Optional[List[Optional[Subscriber]]]:
+    subs = []
+    for sub in group:
+        subs.append(Subscriber.objects.get(user_id=sub))
+    return subs
+
+
+@sync_to_async
 def get_subs_in_group_name(group_name: str) -> Optional[List[Optional[Subscriber]]]:
     subs = Subscriber.objects.filter(group__name=group_name)
     return subs
@@ -131,6 +139,13 @@ def get_messages_from_sub(username: str) -> Optional[List[Optional[Message]]]:
 
 
 @sync_to_async
+def get_messages_from_sub_by_user_id(user_id: int) -> Optional[List[Optional[Message]]]:
+    """Получить все сообщения от user_id."""
+    messages = Message.objects.filter(author__user_id=user_id)
+    return messages
+
+
+@sync_to_async
 def get_all_messages() -> List[Message]:
     """Получить все сообщения."""
     messages = Message.objects.all()
@@ -147,13 +162,21 @@ def get_count_messages() -> int:
 def create_tag(string: str) -> Tag:
     """Создать тему в базе"""
     tag = Tag(tag=string)
-    tag.save() 
-    tag.add(
+    tag.save()
+    tag.subscribers.add(
         Subscriber.objects.get(
             user_id=int(os.environ.get("ADMIN"))
         )
     )
+    tag.save()
     return tag
+
+
+@sync_to_async
+def add_subscribers_to_tag(tag: Tag, group: List[Subscriber]) -> None:
+    for sub in group:
+        tag.subscribers.add(sub)
+        tag.save()
 
 
 @sync_to_async
@@ -168,8 +191,15 @@ def get_or_create_tag(string: str) -> Optional[Tag]:
                 user_id=int(os.environ.get("ADMIN"))
             )
         )
-        return None
+        tag.save()
+        return
     return tag
+
+
+@sync_to_async
+def get_tag(string: str) -> Tag:
+    """Получить тему."""
+    return Tag.objects.get(tag=string)
 
 
 @sync_to_async
@@ -180,9 +210,9 @@ def get_all_tags(user_id: int) -> List[Tag]:
 
 
 @sync_to_async
-def get_tag(string: str) -> Tag:
-    """Получить тему."""
-    return Tag.objects.get(tag=string)
+def check_sub_tags(tag: str, user_id: int) -> bool:
+    return (Subscriber.objects.get(user_id=user_id)
+                      .tags.filter(tag=tag).exists())
 
 
 @sync_to_async
@@ -198,6 +228,12 @@ def check_exist_username(string: str) -> bool:
 
 
 @sync_to_async
+def check_exist_user_id(user_id: int) -> bool:
+    """Проверить наличие темы."""
+    return Subscriber.objects.filter(user_id=user_id).exists()
+
+
+@sync_to_async
 def delete_tags(tag: str) -> None:
     """Удалить тему."""
     tag = Tag.objects.get(tag=tag)
@@ -209,7 +245,7 @@ def get_user() -> User:
     user_id = int(os.environ.get("ADMIN"))
     try:
         user = User.objects.get(user_id=user_id)
-    except:
+    except Exception:
         user = User.objects.get(
             username=os.environ.get("DJANGO_SU_ADMIN")
         )
