@@ -38,7 +38,7 @@ Help по токенам
 docker-compose up --build
 ```
 - По адресу localhost:8003/admin/ переходим в панель и входим под ранее созданным superuser-ом;
-<img src="media/Django_admin.JPG" alt="django-admin" border="1">
+<img src="media/django_admin.JPG" alt="django-admin" border="1">
 
 - Проект запущен и готов к работе.
 
